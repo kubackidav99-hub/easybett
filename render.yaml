@@ -1,0 +1,25 @@
+# Wariant ciągły: płatna aplikacja i płatna baza. Przed zatwierdzeniem sprawdź koszt w Renderze.
+services:
+  - type: web
+    name: easybet
+    runtime: docker
+    plan: 0.5c-512mb
+    region: frankfurt
+    healthCheckPath: /
+    envVars:
+      - key: COOKIE_SECURE
+        value: '1'
+      - key: AUTOSCAN
+        value: '1'
+      - key: DATABASE_URL
+        fromDatabase:
+          name: easybet-db
+          property: connectionString
+databases:
+  - name: easybet-db
+    plan: 0.1c-256mb
+    diskSizeGB: 1
+    region: frankfurt
+    databaseName: easybet
+    user: easybet
+    ipAllowList: []
