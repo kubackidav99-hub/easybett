@@ -206,6 +206,8 @@ body{background:var(--bg);font-size:14px}header{background:#151516;box-shadow:no
 .od.on,.market-line .od.on{box-shadow:none!important;animation:none!important;outline:none}.market-line .od{box-shadow:none!important;overflow:hidden;min-height:34px}.market-line .od.on .pick-copy{color:#dfebce}.market-line .od.on .pick-copy:after{background:#66774e}.market-line{padding:4px 0;gap:24px}.market-line .od b{padding:6px 8px;min-width:51px}.market-line .od.on b{box-shadow:none}.slip #st{height:26px;max-width:48px;padding:2px 3px;font-size:12px;border-radius:5px;-moz-appearance:textfield;appearance:textfield}.slip #st::-webkit-inner-spin-button,.slip #st::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.q{margin-top:7px}.q button{padding:3px 0}.sports-panel:empty{display:none}.tools-menu{font-size:11px}.tools-menu summary{padding:5px 9px;gap:15px}.tools-menu button{margin:5px;font-size:11px;padding:5px 8px}.source-error{width:100%;font-size:12px;color:var(--push)}.leg .lg2{min-width:0}.leg .lg2>div{min-width:0}.leg b{font-size:12px;overflow-wrap:anywhere}.leg small{font-size:10px}
 @media(max-width:600px){.market-line{gap:12px}.market-line .od b{padding:6px;min-width:43px}.market-line .od .pick-copy{font-size:10px}.market-lines{padding-left:10px;padding-right:10px}.tools-menu{width:100%}}
 
+.market-search{display:flex;align-items:center;gap:10px;padding:11px 14px;margin:12px 0;background:#19191b;border:1px solid var(--line);border-radius:12px}.market-search input{flex:1;min-width:0;width:100%;border:0;background:transparent;padding:5px 0;font-size:14px;outline:none}.market-search:focus-within{border-color:#a9c185}.market-search button{flex:none;background:transparent;border:0;padding:4px 8px}.search-empty{padding:28px;text-align:center;color:var(--mute)}
+.slip h2{font-size:22px}.slip{padding:20px}.leg{padding:16px 0;align-items:flex-start;gap:10px}.ticket-line{flex:1;min-width:0}.ticket-match{font-size:12px!important;line-height:1.5;color:#b9bbc1;display:block;margin-bottom:7px;overflow-wrap:anywhere}.ticket-choice{display:flex;align-items:flex-start;gap:12px;justify-content:space-between}.ticket-choice .ticket-pick{font-size:17px!important;font-weight:750;line-height:1.4;overflow-wrap:anywhere;min-width:0}.ticket-odds{font-size:19px!important;font-weight:750;line-height:1.4;color:#d5e5bf;white-space:nowrap;font-variant-numeric:tabular-nums;flex:none}.ticket-market{font-size:13px!important;line-height:1.5;margin-top:5px;display:block;color:#aeb0b8;overflow-wrap:anywhere}.leg .x{margin-top:2px}.slip .row>span,.slip .row>label{font-size:15px}.slip #ts{font-size:18px}.slip #tp{font-size:24px}.slip .go{font-size:16px;min-height:46px}.slip .chip{font-size:14px}.cp{padding:20px 22px;border-radius:14px}.cp>.row{margin:0 0 14px;gap:10px;flex-wrap:wrap}.cp>.row>b{font-size:17px}.cp .ticket-line{padding:15px 0;border-top:1px solid #303034}.cp .ticket-choice .ticket-pick{font-size:18px!important}.cp .ticket-odds{font-size:20px!important}.ticket-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;background:#222225;border:1px solid #343438;border-radius:11px;padding:14px;margin-top:16px}.ticket-summary small{display:block;font-size:12px!important;line-height:1.5;margin-bottom:5px}.ticket-summary b{font-size:19px;display:block;line-height:1.4;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.ticket-summary .ticket-return{color:#d5e5bf}.cp .acts:empty{display:none}@media(max-width:480px){.cp{padding:17px 15px}.ticket-summary{gap:8px;padding:12px 10px}.ticket-summary b{font-size:16px}.ticket-summary small{font-size:11px!important}.ticket-choice{gap:10px}.cp .ticket-choice .ticket-pick{font-size:17px!important}.slip{padding:18px}}
 </style>
 </head>
 <body>
@@ -230,7 +232,7 @@ body{background:var(--bg);font-size:14px}header{background:#151516;box-shadow:no
   </div>
   <aside class="box slip" id="slip"></aside>
 </div>
-<footer><span>NBA / Preseason · Superbet i własne kursy · Gra wyłącznie na wirtualne pieniądze.</span><button id="reset">Zacznij od nowa</button><details class="tools-menu"><summary>Własna oferta</summary><button data-v="new">+ Dodaj mecz ręcznie</button><button data-export="1">Eksportuj mecze</button><button data-import="1">Importuj mecze</button><input id="offlineImport" type="file" accept=".json,application/json" hidden></details></footer>
+<footer><span>NBA / Preseason · Kursy Superbet · Gra wyłącznie na wirtualne pieniądze.</span><button id="reset">Zacznij od nowa</button></footer>
 <script src="market-tools.js"></script><script src="slip-tools.js"></script><script src="core.js"></script><script src="offline-data.js"></script>
 <script>
 let M=[],sportKey='basketball_nba',SB=[],sourceJob={status:'idle',errors:[]},sourceBusy=false,sourceTimer=null,sourceAutoPick=true;
@@ -248,6 +250,7 @@ const selectionKey=(m,o)=>[selectionGroup(m,o),o[2]?.team||o[2]?.side||o[2]?.par
 const inSlip=k=>slip.some(s=>s.k===k);
 
 function render(){
+ const focusedSearch=document.activeElement?.id==='marketSearch',searchCaret=focusedSearch?document.activeElement.selectionStart:null;
  const marketState=lastView===view?new Map([...$('main').querySelectorAll('details')].map(d=>[d.querySelector('summary').textContent,d.open])):null;
 
   if(lastView!==view){lastView=view;const mm=$('main');mm.classList.remove('fx');void mm.offsetWidth;mm.classList.add('fx')}
@@ -262,9 +265,10 @@ function render(){
   $('menu').innerHTML=[['games','Mecze',IC.g],['bets','Moje kupony',IC.b],['stats','Statystyki',IC.s]].map(([k,t,ic])=>`<button class="mi ${k==='bets'&&open?'has-count':''} ${(k==='games'?(isM||view==='new'):view===k)?'on':''}" data-v="${k==='games'?(cur||'bets'):k}"><span class="menu-icon">${ic}</span><span class="menu-label">${t}</span>${k==='bets'&&open?`<span class="menu-count" aria-label="Otwarte kupony: ${open}">${open}</span>`:''}</button>`).join('');
   const regular=M.filter(m=>!m.preseason&&(!m.sportKey||m.sportKey==='basketball_nba')),pre=M.filter(m=>m.preseason),shown=leagueCat==='preseason'?pre:regular;
   $('cats').innerHTML=(isM||view==='new')?`<button class="chip ${leagueCat==='regular'?'on':''}" data-cat="regular">NBA (${regular.length})</button><button class="chip ${leagueCat==='preseason'?'on':''}" data-cat="preseason">Preseason (${pre.length})</button>`:'';
-  $('nav').innerHTML=(isM||view==='new')?shown.map(m=>`<button class="mc ${view===m.id?'on':''}" data-v="${m.id}">${bdg(m.h,1)}${bdg(m.a,1)}<span><b>${esc(L(m.h))} – ${esc(L(m.a))}</b>${m.preseason?'<em class="badge-pre">PRESEASON</em>':''}<small>${tt(m.t)}</small></span></button>`).join('')+'<button class="mc'+(view==='new'?' on':'')+'" data-v="new"><b>+ Własny mecz</b></button>':'';
-    $('main').innerHTML=(view==='bets'?bets():view==='stats'?stats():view==='new'?newForm():(M.find(m=>m.id===view)?match(M.find(m=>m.id===view)):'<div class="box empty">Brak meczów. Dodaj własny przyciskiem „+ Własny mecz”.</div>'));
+  $('nav').innerHTML=(isM||view==='new')?shown.map(m=>`<button class="mc ${view===m.id?'on':''}" data-v="${m.id}">${bdg(m.h,1)}${bdg(m.a,1)}<span><b>${esc(L(m.h))} – ${esc(L(m.a))}</b>${m.preseason?'<em class="badge-pre">PRESEASON</em>':''}<small>${tt(m.t)}</small></span></button>`).join(''):'';
+    $('main').innerHTML=(view==='bets'?bets():view==='stats'?stats():view==='new'?emptyOffer():(M.find(m=>m.id===view)?match(M.find(m=>m.id===view)):'<div class="box empty">Brak meczów w tej kategorii. Oferta jest odświeżana automatycznie co 5 minut.</div>'));
   if(marketState)$('main').querySelectorAll('details').forEach(d=>{const title=d.querySelector('summary').textContent;if(marketState.has(title))d.open=marketState.get(title)});
+  if(focusedSearch&&$('marketSearch')){$('marketSearch').focus();if(searchCaret!==null)$('marketSearch').setSelectionRange(searchCaret,searchCaret);}
   renderOddsControls();
   renderSlip();
   if(motionAllowed()){
@@ -281,27 +285,11 @@ const AB={Hawks:'atl',Celtics:'bos',Nets:'bkn',Hornets:'cha',Bulls:'chi',Cavalie
 const bdg=(n,sm)=>{const k=n.split(' ').pop(),ab=AB[k];return `<span class="bdg ${sm?'s':''}${ab?'':' nologo'}" data-t="${esc(k.slice(0,3).toUpperCase())}" style="--c:hsl(${hue(n)} 55% 42%)">${ab?`<img src="https://a.espncdn.com/i/teamlogos/nba/500/${ab}.png" alt="${k}" loading="lazy" onerror="this.parentNode.classList.add('nologo');this.remove()">`:''}</span>`};
 const IC={g:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></svg>',b:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v3a3 3 0 0 0 0 6v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a3 3 0 0 0 0-6V6a2 2 0 0 1 2-2z"/><path d="M14 8v8" stroke-dasharray="2 2.5"/></svg>',s:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>'};
 
-function newForm(){
-  const d=new Date(Date.now()+864e5);d.setMinutes(0);const v=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
-  const N=(id,ph)=>`<input id="${id}" type="number" step="0.01" placeholder="${ph}" style="flex:1 1 90px">`;
-  return `<div class="box mh"><h2 style="margin:0 0 4px">Własny mecz</h2><span>Przepisz mecz i kursy z Twojego bukmachera, np. mecz przedsezonowy. Zakłady na niego rozliczasz ręcznie.</span></div>
-  <div class="box"><div class="cust"><input id="nh" placeholder="Gospodarze (np. Charlotte Hornets)" style="flex:1 1 220px"><input id="na" placeholder="Goście (np. Brooklyn Nets)" style="flex:1 1 220px"><input id="nt" type="datetime-local" value="${v}" style="flex:1 1 220px"></div>
-  <div class="cust"><label>Kategoria <select id="nseason"><option value="regular" ${leagueCat==='regular'?'selected':''}>NBA</option><option value="preseason" ${leagueCat==='preseason'?'selected':''}>Preseason</option></select></label></div><div class="cust"><b style="flex:1 1 100%">Zwycięzca – kursy</b>${N('m1','Kurs gospodarzy')}${N('m2','Kurs gości')}</div>
-  <div class="cust"><b style="flex:1 1 100%">Handicap – linia gospodarzy, np. -3.5</b>${N('hl','Linia')}${N('h1','Kurs gospodarzy')}${N('h2','Kurs gości')}</div>
-  <div class="cust"><b style="flex:1 1 100%">Suma punktów</b>${N('tl','Linia')}${N('t1','Kurs powyżej')}${N('t2','Kurs poniżej')}</div>
-  <div class="cust"><span style="color:var(--mute)">Wymagane: drużyny i data. Kursy możesz dodać później, również same propsy.</span><button class="go" id="ns" style="margin-left:auto">Dodaj mecz</button></div></div>`;
-}
-function addMatch(){
-  const g=id=>$(id).value.trim(),n=id=>parseFloat($(id).value),ok=x=>x>1;
-  const h=g('nh'),a=g('na'),t=g('nt');if(!h||!a||!t)return alert('Wpisz obie drużyny i datę.');
-  const mk=[],sh=L(h),sa=L(a),sg=x=>(x>0?'+':'')+x;
-  if(ok(n('m1'))&&ok(n('m2')))mk.push(['Zwycięzca (z dogrywką)',[[h,n('m1'),{t:'ml',team:h}],[a,n('m2'),{t:'ml',team:a}]]]);
-  const hl=n('hl');if(!isNaN(hl)&&ok(n('h1'))&&ok(n('h2')))mk.push(['Handicap (z dogrywką)',[[sh+' '+sg(hl),n('h1'),{t:'sp',team:h,pt:hl}],[sa+' '+sg(-hl),n('h2'),{t:'sp',team:a,pt:-hl}]]]);
-  const tl=n('tl');if(!isNaN(tl)&&ok(n('t1'))&&ok(n('t2')))mk.push(['Suma punktów meczu',[['Powyżej '+tl,n('t1'),{t:'tot',side:'over',pt:tl}],['Poniżej '+tl,n('t2'),{t:'tot',side:'under',pt:tl}]]]);
-  if(!Number.isFinite(Date.parse(t)))return alert('Wpisz poprawną datę.');
-  const preseason=$('nseason').value==='preseason';const ev={id:'c'+Date.now()+Math.random().toString(16).slice(2),h,a,t:new Date(t).toISOString(),mk,custom:true,preseason,sportKey:preseason?'basketball_nba_preseason':'basketball_nba',book:'Kursy wpisane ręcznie',manualSettlement:true};
-  (S.custom=S.custom||[]).push(ev);M.push(ev);M.sort((x,y)=>new Date(x.t)-new Date(y.t));save();view=ev.id;leagueCat=preseason?'preseason':'regular';render();
-}
+function emptyOffer(){return '<div class="box empty">Brak meczów w tej kategorii. Oferta jest odświeżana automatycznie co 5 minut.</div>';}
+const marketQueries=new Map();
+function searchBox(m){return `<div class="market-search"><span aria-hidden="true">⌕</span><input id="marketSearch" type="search" aria-label="Szukaj typów w tym meczu" placeholder="Szukaj typu, zawodnika lub linii…" value="${esc(marketQueries.get(m.id)||'')}"><button type="button" data-clear-search="1" aria-label="Wyczyść wyszukiwanie">×</button></div>`;}
+function filterMarketLayout(m){const terms=(marketQueries.get(m.id)||'').trim().split(/\s+/).filter(Boolean).map(MarketTools.norm);return MarketTools.layout(m).map(g=>({...g,rows:g.rows.filter(row=>{const text=MarketTools.norm(g.name+' '+row.map(v=>v.o[0]).join(' '));return terms.every(t=>text.includes(t));})})).filter(g=>g.rows.length);}
+function updateMarketSearch(){const m=M.find(m=>m.id===view);if(m&&$('marketResults'))$('marketResults').innerHTML=marketCards(m);}
 let lastView,lastSlipKeys=new Set(),lastOpenCount=0,lastBalance=null;
 const motionAllowed=()=>!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function probBar(m){const k=m.mk.find(x=>/^Zwycięzca/.test(x[0]));if(!k||k[1].length!==2)return '';const a=1/k[1][0][1],b=1/k[1][1][1],p=Math.round(a/(a+b)*100);
@@ -314,7 +302,7 @@ function adjMk(m){return m.base||m.mk;}
 const reM=()=>M.forEach(m=>{m.base=m.base||m.mk;m.mk=adjMk(m)});
 function renderOddsControls(){
  const errors=sourceJob.errors||[];$('oddsPanel').innerHTML=errors.length?`<details class="source-error"><summary>Nie udało się pobrać części kursów</summary>${errors.map(e=>`<p>${esc(e.scope)}: ${esc(e.message)}</p>`).join('')}</details>`:'';
- $('offlineImport').onchange=e=>{if(e.target.files[0])importMatches(e.target.files[0]);};
+
 }
 async function sourceApi(method='GET'){
  const r=await fetch('/api/superbet',{method}),j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j;
@@ -340,19 +328,9 @@ function addMarket(){
  const title=kind+' · '+name+(person?' – '+person:'');
  let group=m.mk.find(k=>k[0]===title);if(!group){group=[title,[]];m.mk.push(group);}
  const option=[pick,price,{t:'custom',marketId:title,book:'Wpisany ręcznie'}];
- if(m.source==='superbet')return alert('W meczu Superbet użyj pola Własny typ poniżej albo utwórz mecz ręczny. Oferta automatyczna jest odświeżana ze źródła.');const idx=group[1].findIndex(o=>o[0]===pick);if(idx<0)group[1].push(option);else group[1][idx]=option;
+ if(m.source==='superbet')return alert('W meczu Superbet użyj pola Własny typ poniżej. Oferta automatyczna jest odświeżana ze źródła.');const idx=group[1].findIndex(o=>o[0]===pick);if(idx<0)group[1].push(option);else group[1][idx]=option;
  delete m.base;const pos=(S.custom||[]).findIndex(e=>e.id===m.id);if(pos<0)(S.custom=S.custom||[]).push(m);else S.custom[pos]=m;save();render();
 }
-function exportData(){
- const blob=new Blob([JSON.stringify({format:'easybet-offline-v1',matches:S.custom||[]},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='easybet-mecze.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-async function importMatches(file){
- try{if(file.size>5*1024*1024)throw new Error('Plik przekracza 5 MB.');const j=JSON.parse(await file.text()),events=OfflineData.validateMatches(j);let added=0;
-  for(const e of events){if((S.custom||[]).some(x=>x.id===e.id))continue;(S.custom=S.custom||[]).push(e);added++;}
-  save();M=SB.concat(S.custom||[]).sort((a,b)=>Date.parse(a.t)-Date.parse(b.t));cur=view=events.find(e=>M.some(m=>m.id===e.id))?.id||M[0]?.id||'new';leagueCat=M.find(e=>e.id===view)?.preseason?'preseason':'regular';render();alert('Dodano meczów: '+added+'. Istniejące identyfikatory pominięto.');
- }catch(e){alert('Import nieudany: '+e.message);}
-}
-
 function stats(){
  const d=S.bets.filter(b=>b.st!=='open'),dc=d.filter(b=>b.st==='won'||b.st==='lost'),w=dc.filter(b=>b.st==='won');
  const prof=d.reduce((a,b)=>a+(b.st==='won'?b.stake*(b.odds-1):b.st==='lost'?-b.stake:0),0),stk=dc.reduce((a,b)=>a+b.stake,0),y=stk?prof/stk*100:null;
@@ -360,14 +338,15 @@ function stats(){
  const C=[['Saldo',f(S.bal)+' zł'],['Zysk / strata',(prof>0?'+':'')+f(prof)+' zł'],['Yield',y===null?'–':(y>0?'+':'')+f(y)+'%'],['Skuteczność',dc.length?Math.round(w.length/dc.length*100)+'%':'–'],['Rozliczone',d.length],['Otwarte',S.bets.length-d.length],['Średni kurs',S.bets.length?f(S.bets.reduce((a,b)=>a+b.odds,0)/S.bets.length):'–'],['Największa wygrana',best?'+'+f(best)+' zł':'–']];
  return `<div class="sg">${C.map(c=>`<div class="box st"><small>${c[0]}</small><b>${c[1]}</b></div>`).join('')}</div>`}
 function marketCards(m){
- return MarketTools.layout(m).map(({name,rows})=>`<details class="box market-card" open><summary><span>${esc(name)}</span><small>${rows.length>1?rows.length+' linii':''}</small></summary><div class="market-lines">${rows.map(options=>`<div class="market-line" style="--cols:${Math.min(options.length,3)}">${options.map(({o,i,j})=>`<button class="od ${inSlip(selectionKey(m,o))?'on':''}" ${quoteFresh(o[2])?'':'disabled title="Nieaktualny kurs"'} data-m="${m.id}" data-i="${i}" data-j="${j}" aria-pressed="${inSlip(selectionKey(m,o))}"><span class="pick-copy">${esc(MarketTools.compact(o[0],m.mk[i][0],m))}</span><b>${f(o[1])}</b></button>`).join('')}</div>`).join('')}</div></details>`).join('');
+ const layout=filterMarketLayout(m);if(!layout.length)return '<div class="box search-empty" role="status">'+(m.mk.length?'Brak typów pasujących do wyszukiwania.':'Brak kursów dla tego meczu.')+'</div>';return layout.map(({name,rows})=>`<details class="box market-card" open><summary><span>${esc(name)}</span><small>${rows.length>1?rows.length+' linii':''}</small></summary><div class="market-lines">${rows.map(options=>`<div class="market-line" style="--cols:${Math.min(options.length,3)}">${options.map(({o,i,j})=>`<button class="od ${inSlip(selectionKey(m,o))?'on':''}" ${quoteFresh(o[2])?'':'disabled title="Nieaktualny kurs"'} data-m="${m.id}" data-i="${i}" data-j="${j}" aria-pressed="${inSlip(selectionKey(m,o))}"><span class="pick-copy">${esc(MarketTools.compact(o[0],m.mk[i][0],m))}</span><b>${f(o[1])}</b></button>`).join('')}</div>`).join('')}</div></details>`).join('');
 }
 function match(m){
   return `<div class="box hero"><div class="tm">${bdg(m.h)}<span>${esc(m.h)}</span></div><div class="vs"><b>vs</b><span>${esc(m.sportTitle||'NBA')}${m.preseason?' · PRESEASON':''} · ${new Date(m.t).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'})}</span>${m.book?`<span class="src">Kursy: ${esc(m.book)}</span>`:''}</div><div class="tm">${bdg(m.a)}<span>${esc(m.a)}</span></div></div>`+(m.manualSettlement&&m.source!=='superbet'?'<div class="box mh"><small>Rozpoznane typy NBA rozliczamy po końcowym wyniku. Własne i nieobsługiwane rynki rozliczysz ręcznie.</small></div>':'')+probBar(m)+(m.custom?`<div class="acts" style="margin:-4px 0 12px"><button data-dm="${m.id}">Usuń ten mecz</button></div>`:'')+
-  (m.mk.length?marketCards(m):'<div class="box noodds">Brak kursów dla tego meczu.</div>')+
+  searchBox(m)+'<div id="marketResults">'+marketCards(m)+'</div>'+
   (m.source==='superbet'?`<div class="box mh"><small>Odczyt ${tt(m.updatedAt)}</small></div>`:extraMarketForm())+
   `<div class="box"><div class="mh" style="padding-bottom:0"><b>Własny typ</b><br><span>Dodaj dowolny typ, np. „Wembanyama 3+ bloki”, z własnym kursem.</span></div><div class="cust"><input id="cn" placeholder="Opis typu" style="flex:2 1 180px"><input id="co" type="number" step="0.01" min="1.01" placeholder="Kurs" style="flex:1 1 80px"><button class="go" id="ca">Dodaj do kuponu</button></div></div>`;
 }
+function ticketLine(l,history=false){const market=l.market||l.mk||'',ev=l.ev,match=ev?.h&&ev?.a?ev.h+' – '+ev.a:l.match;const label=l.shortLabel||MarketTools.compact(l.label,market,ev||{});return `<div class="ticket-line"><small class="ticket-match">${esc(match||'Mecz')}${l.meta?.book?' · '+esc(l.meta.book):''}</small><div class="ticket-choice"><b class="ticket-pick">${esc(label)}</b><b class="ticket-odds">${f(l.odds)}</b></div><small class="ticket-market">${esc(market)}</small></div>`;}
 function bets(){
   if(!S.bets.length)return '<div class="box empty">Nie masz jeszcze zakładów.</div>';
   return '<div class="box mh auto-note"><span>Wyniki sprawdzamy automatycznie co 5 minut. Nierozpoznane rynki i typy bez danych pozostają otwarte; możesz rozliczyć je ręcznie.</span></div>'+((typeof settlementNote==='string'&&settlementNote)?'<div class="box mh"><small>'+esc(settlementNote)+'</small></div>':'') +S.bets.slice().reverse().map(b=>{
@@ -375,14 +354,14 @@ function bets(){
     const col=b.st==='won'?'var(--win)':b.st==='lost'?'var(--lose)':'var(--push)';
     const res=b.st==='won'?'+'+f(b.stake*(b.odds-1)):b.st==='lost'?'−'+f(b.stake):'0,00';
     return `<div class="box cp ${b.st==='open'?'':b.st}"><div class="row"><b>${b.legs.length>1?'AKO ('+b.legs.length+')':'Pojedynczy'}</b>${b.st==='open'?'<small>Otwarty</small>':`<b style="color:${col}">${lab} ${res} zł${b.autoSettled?' · Auto':''}</b>`}</div>`+
-    b.legs.map(l=>`<div class="lg2">${l.meta&&l.meta.team?bdg(l.meta.team,1):(plName(l.mk)?av(plName(l.mk)):'')}<span><b>${esc(l.label)}</b> <small>${esc(l.mk)} · ${esc(l.match)} · ${f(l.odds)}${l.meta?.book?' · '+esc(l.meta.book):''}</small></span></div>`).join('')+
-    `<small>Kurs ${f(b.odds)} · stawka ${f(b.stake)} zł · wygrana ${f(b.stake*b.odds)} zł</small>
+    b.legs.map(l=>ticketLine(l,true)).join('')+
+    `<div class="ticket-summary"><div><small>Kurs łączny</small><b>${f(b.odds)}</b></div><div><small>Stawka</small><b>${f(b.stake)} zł</b></div><div><small>${b.st==='open'?'Możliwa wypłata':'Wypłata'}</small><b class="ticket-return">${f(b.st==='open'?b.stake*b.odds:pay(b))} zł</b></div></div>
     <div class="acts">${b.st==='open'?`<button class="w" data-a="won" data-b="${b.id}">Wygrany</button><button class="l" data-a="lost" data-b="${b.id}">Przegrany</button><button class="u" data-a="push" data-b="${b.id}">Zwrot</button><button data-a="del" data-b="${b.id}">Usuń</button>`:(b.autoSettled?'':`<button data-a="undo" data-b="${b.id}">Cofnij rozliczenie</button>`)}</div></div>`}).join('');
 }
 function renderSlip(){
   if(!slip.length){$('slip').innerHTML='<h2>Kupon</h2><div class="empty">Brak kuponów<br><small>Kliknij kurs, aby dodać typ.</small></div>';return}
   $('slip').innerHTML=`<h2>Kupon</h2><div class="nav"><button class="chip ${mode==='single'?'on':''}" data-md="single">Pojedyncze</button><button class="chip ${mode==='acca'?'on':''}" data-md="acca">AKO</button></div>`+
-  (mode==='acca'&&new Set(slip.map(SlipTools.eventKey)).size<slip.length?'<small style="display:block;color:var(--mute);margin:10px 0">Wirtualne AKO: kurs to iloczyn, bez wyceny Bet Buildera.</small>':'')+slip.map(s=>`<div class="leg"><div class="lg2">${s.meta&&s.meta.team?bdg(s.meta.team,1):(plName(s.market)?av(plName(s.market)):'')}<div><b>${esc(s.shortLabel||s.label)}</b> <span style="color:var(--blue)">${f(s.odds)}</span><small>${esc(s.market)} · ${esc(s.match)}${s.meta?.book?' · '+esc(s.meta.book):''}</small></div></div><button class="x" data-rm="${s.k}" aria-label="Usuń">×</button></div>`).join('')+
+  (mode==='acca'&&new Set(slip.map(SlipTools.eventKey)).size<slip.length?'<small style="display:block;color:var(--mute);margin:10px 0">Wirtualne AKO: kurs to iloczyn, bez wyceny Bet Buildera.</small>':'')+slip.map(s=>`<div class="leg">${ticketLine(s)}<button class="x" data-rm="${s.k}" aria-label="Usuń">×</button></div>`).join('')+
   `<div class="row" style="margin-top:12px"><label for="st">Stawka${mode==='single'&&slip.length>1?' (na każdy typ)':''}</label><input id="st" type="number" min="1" step="1" value="${stake}" style="width:48px;text-align:right"></div>
   <div class="q">${[10,50,100,250].map(v=>`<button data-q="${v}">${v}</button>`).join('')}</div>
   <div class="row"><span>Łączna stawka</span><b id="ts"></b></div><div class="row"><span>Wypłata</span><b id="tp"></b></div>
@@ -394,13 +373,12 @@ function totals(){
   const ts=(stake||0)*n,tp=mode==='single'?slip.reduce((a,s)=>a+(stake||0)*s.odds,0):(stake||0)*o;
   if($('ts')){$('ts').textContent=f(ts)+' zł';$('tp').textContent=f(tp)+' zł'}
 }
-document.addEventListener('input',e=>{if(e.target.id==='st'){stake=parseFloat(e.target.value)||0;totals()}});
+document.addEventListener('input',e=>{if(e.target.id==='marketSearch'){marketQueries.set(view,e.target.value);updateMarketSearch();return;}if(e.target.id==='st'){stake=parseFloat(e.target.value)||0;totals()}});
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+  if(d.clearSearch){marketQueries.delete(view);if($('marketSearch')){$('marketSearch').value='';$('marketSearch').focus();}updateMarketSearch();return;}
   if(d.source){refreshSource();return}
   if(d.market){addMarket();return}
-  if(d.export){exportData();return}
-  if(d.import){$('offlineImport').click();return}
   if(d.v){sourceAutoPick=false;view=d.v;const m=M.find(x=>x.id===view);if(m){sportKey=m.sportKey||'basketball_nba';leagueCat=m.preseason?'preseason':'regular'}}
   else if(d.cat){leagueCat=d.cat;sportKey=d.cat==='preseason'?'basketball_nba_preseason':'basketball_nba';const list=M.filter(m=>d.cat==='preseason'?m.preseason:!m.preseason&&(!m.sportKey||m.sportKey==='basketball_nba'));if(list.length)view=list[0].id;else view='new'}
   else if(d.m){const m=M.find(x=>x.id==d.m),i=+d.i,j=+d.j,markets=m.mk,o=markets[i][1][j],key=selectionGroup(m,o),k=selectionKey(m,o);
@@ -410,7 +388,6 @@ document.addEventListener('click',e=>{
     if(!had)slip.push({k,mk:key,label:o[0],shortLabel:MarketTools.compact(o[0],markets[i][0],m),odds:o[1],market:markets[i][0],match:m.h.split(' ').pop()+' – '+m.a.split(' ').pop(),meta:o[2],ev:{id:m.id,h:m.h,a:m.a,t:m.t,preseason:!!m.preseason,sport:m.sportKey||'basketball_nba'}});
     const before=slip.length;if(mode==='acca')slip=SlipTools.compatible(slip);slip.forEach(s=>s.mk2=s.market);err=before!==slip.length?'Zastąpiono powiązany typ z tego meczu.':''}
   else if(d.q){stake=+d.q}
-  else if(t.id==='ns'){addMatch();return}
   else if(d.dm){if(confirm('Usunąć ten mecz z listy? Postawione zakłady zostaną.')){S.custom=(S.custom||[]).filter(x=>x.id!==d.dm);M=M.filter(x=>x.id!==d.dm);view=M.length?M[0].id:'bets';save()}}
   else if(d.rm){slip=slip.filter(s=>s.k!==d.rm)}
   else if(d.md){mode=d.md;const before=slip.length;if(mode==='acca')slip=SlipTools.compatible(slip);err=before!==slip.length?'AKO: powiązane typy zastąpiono ostatnim wyborem.':''}

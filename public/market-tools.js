@@ -7,7 +7,7 @@ function handicap(text){const m=String(text).match(/(?:Handicap\s*)?\(([+-]?\d+(
 function compact(text,title,ev){
  const team=teamIn(text,ev),hc=/handicap/i.test(title)?handicap(text):null;
  if(team&&hc!==null)return team+' '+(hc>=0?'+':'')+String(hc).replace('.',',');
- const over=String(text).match(/(Powyżej|Poniżej)\s*([+-]?\d+(?:[.,]\d+)?)/i);if(over)return over[1]+' '+over[2].replace('.',',');
+ const over=String(text).match(/(Powyżej|Poniżej)\s*([+-]?\d+(?:[.,]\d+)?)/i);if(over){const prefix=String(text).slice(0,over.index).trim().replace(/[–—:\-]\s*$/,'').trim();return (prefix?prefix+' · ':'')+over[1]+' '+over[2].replace('.',',');}
  if(team&&/zwycięzca|^mecz(?:\s|$)/i.test(title))return team;
  return text;
 }
