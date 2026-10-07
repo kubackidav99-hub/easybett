@@ -1,0 +1,4 @@
+const {settleBet}=require('./public/core');
+function apply(state,data){const next=structuredClone(state);let count=0;for(const b of next.bets){if(settleBet(b,data.games,data.stats)){count++;if(b.st==='won')next.bal+=b.stake*b.odds;else if(b.st==='push')next.bal+=b.stake;}}return{state:next,count};}
+function createSettlement(store,source){let running=null,lastStarted=0;return{start(){if(running)return running;if(Date.now()-lastStarted<300000)return Promise.resolve(0);lastStarted=Date.now();running=(async()=>{const users=await store.pending();const legs=users.flatMap(u=>u.state.bets.filter(b=>b.st==='open').flatMap(b=>b.legs));if(!legs.length)return 0;const data=await source.resolve(legs);let count=0;for(const u of users){const result=apply(u.state,data);if(result.count&&await store.update(u.id,u.version,result.state)!==null)count+=result.count;}return count;})().finally(()=>running=null);return running;}};}
+module.exports={apply,createSettlement};
