@@ -1,0 +1,8 @@
+const test=require('node:test'),assert=require('node:assert/strict');const {compatible,conflict,duplicates,eventKey}=require('../public/slip-tools');
+const ev={id:'sb1',h:'Indiana Pacers',a:'Minnesota Timberwolves',t:'2026-10-07T23:00:00Z'};
+const pick=(market,label,e=ev)=>({market,label,ev:e});
+const winner=pick('Zwycięzca (z dogrywką)','Indiana Pacers wygra mecz'),reg=pick('Mecz','Indiana Pacers wygra mecz'),spread=pick('Handicap (z dogrywką)','Indiana Pacers (-2.5)');
+const pts=pick('Punkty zawodnika','Pascal Siakam Powyżej 25.5'),ast=pick('Asysty zawodnika','Anthony Edwards Powyżej 5.5');
+test('AKO allows separate players and replaces winner/regulation/handicap dependencies',()=>{assert.equal(conflict(winner,reg),true);assert.equal(conflict(winner,spread),true);assert.equal(conflict(pts,ast),false);assert.deepEqual(compatible([winner,pts,ast,reg]),[pts,ast,reg]);assert.equal(duplicates([pts,ast]),false);});
+test('AKO blocks alternate totals, overlapping same-player props and points with game totals',()=>{const total=pick('Suma punktów','Powyżej 230.5'),other=pick('Suma punktów','Poniżej 240.5');assert.equal(conflict(total,other),true);assert.equal(conflict(pts,total),true);assert.equal(conflict(pts,pick('PRA','Pascal Siakam Powyżej 35.5')),true);assert.equal(conflict(ast,total),false);assert.equal(conflict(pts,pick('Własny typ','Nieznany')),true);});
+test('AKO identity catches alternate IDs and reversed team order without blocking different dates',()=>{assert.equal(eventKey(winner),eventKey({...winner,ev:{...ev,id:'other',h:ev.a,a:ev.h,t:'2026-10-08T01:00:00+02:00'}}));assert.equal(conflict(winner,{...winner,ev:{...ev,t:'2026-10-09T23:00:00Z'}}),false);assert.equal(duplicates([winner,reg]),true);});
